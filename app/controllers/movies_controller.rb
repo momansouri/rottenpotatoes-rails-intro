@@ -14,13 +14,26 @@ class MoviesController < ApplicationController
     if params[:sort_by]
       @sort_by = params[:sort_by]
     end
+    if params[:ratings]
+      ratings = params[:ratings].keys
+    end
     if @sort_by
-      @movies = Movie.order(@sort_by).all 
+      if !ratings
+        @movies = Movie.order(@sort_by).all
+      else
+        @movies = Movie.order(@sort_by).where(rating: ratings)
+      end
+      
       @title_header_css = (@sort_by =='title') ? 'hilite' : ''
       @release_date_header_css = (@sort_by =='release_date') ? 'hilite' : ''
     else
-      @movies = Movie.all
+      if !ratings
+        @movies = Movie.all
+      else
+        @movies = Movie.where(rating: ratings)
+      end
     end
+    @all_ratings = Hash[Movie.ratings.map{|x| [x, ratings ? ratings.include?(x):1]}]
   end
 
   def new
