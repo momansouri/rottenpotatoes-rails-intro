@@ -13,27 +13,28 @@ class MoviesController < ApplicationController
   def index
     if params[:sort_by]
       @sort_by = params[:sort_by]
+      session[:sort_by] = @sort_by
     end
     if params[:ratings]
       ratings = params[:ratings].keys
+      session[:ratings] = ratings
     end
-    if @sort_by
-      if !ratings
-        @movies = Movie.order(@sort_by).all
+    if session[:sort_by]
+      if !session[:ratings]
+        @movies = Movie.order(session[:sort_by]).all
       else
-        @movies = Movie.order(@sort_by).where(rating: ratings)
+        @movies = Movie.order(session[:sort_by]).where(rating: session[:ratings])
       end
-      
-      @title_header_css = (@sort_by =='title') ? 'hilite' : ''
-      @release_date_header_css = (@sort_by =='release_date') ? 'hilite' : ''
+      @title_header_css = (session[:sort_by] =='title') ? 'hilite' : ''
+      @release_date_header_css = (session[:sort_by] =='release_date') ? 'hilite' : ''
     else
-      if !ratings
+      if !session[:ratings]
         @movies = Movie.all
       else
-        @movies = Movie.where(rating: ratings)
+        @movies = Movie.where(rating: session[ratings])
       end
     end
-    @all_ratings = Hash[Movie.ratings.map{|x| [x, ratings ? ratings.include?(x):1]}]
+    @all_ratings = Hash[Movie.ratings.map{|x| [x, session[:ratings] ? session[:ratings].include?(x):1]}]
   end
 
   def new
